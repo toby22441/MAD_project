@@ -1,6 +1,8 @@
 package com.example.toby.solent_eat_out;
 
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.LocationManager;
 import android.support.v7.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,13 +21,22 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.content.Intent;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import android.app.Activity;
+import android.os.Bundle;
+import android.location.LocationManager;
+import android.location.LocationListener;
+import android.location.Location;
+import android.content.Context;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LocationListener
+{
 
     MapView mv;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
 
         super.onCreate(savedInstanceState);
 
@@ -39,7 +50,39 @@ public class MainActivity extends AppCompatActivity {
         mv.setBuiltInZoomControls(true);
         mv.getController().setZoom(16);
         mv.getController().setCenter(new GeoPoint(50.907479, -1.413357));
+
+
+        LocationManager mgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        mgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+    }
+    public void onLocationChanged(Location newLoc)
+    {
+        Toast.makeText(this, "!" , Toast.LENGTH_LONG).show();
+        mv.getController().setCenter(new GeoPoint(newLoc));
+    }
+    public void onProviderDisabled(String provider)
+    {
+        Toast.makeText(this, "Provider " + provider +
+                " disabled", Toast.LENGTH_LONG).show();
     }
 
+    public void onProviderEnabled(String provider)
+    {
+        Toast.makeText(this, "Provider " + provider +
+                " enabled", Toast.LENGTH_LONG).show();
+    }
+
+    public void onStatusChanged(String provider,int status,Bundle extras)
+    {
+
+        Toast.makeText(this, "Status changed: " + status,
+                Toast.LENGTH_LONG).show();
+    }
 }
+
+
+
+
+
+
 
