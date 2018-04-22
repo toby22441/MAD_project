@@ -13,11 +13,20 @@ import android.widget.TextView;
 
 
 public class AddRestaurantActivity extends AppCompatActivity implements View.OnClickListener {
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_restaurant);
-        Button search =(Button)findViewById(R.id.btnSearchRestaurant);
+        Button search = (Button) findViewById(R.id.btnSearchRestaurant);
         search.setOnClickListener(this);
+    }
+
+    public void onClick(View view) {
+        Intent intent = new Intent();
+        Bundle bundle = new Bundle();
+    }
+
 }
+
 
