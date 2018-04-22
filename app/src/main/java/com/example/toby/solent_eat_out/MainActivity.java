@@ -78,6 +78,28 @@ public class MainActivity extends AppCompatActivity implements LocationListener
         Toast.makeText(this, "Status changed: " + status,
                 Toast.LENGTH_LONG).show();
     }
+
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        MenuInflater inflater=getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        if(item.getItemId() == R.id.choosemap)
+        {
+            Intent intent = new Intent(this,MapChooseActivity.class);
+            startActivityForResult(intent,0);
+            return true;
+        }
+
+        if(item.getItemId() == R.id.SetLocation)
+        {
+            Intent intent = new Intent(this,SetLocationActivity.class);
+            startActivityForResult(intent,1);
+            return true;
+        }
 }
 
 

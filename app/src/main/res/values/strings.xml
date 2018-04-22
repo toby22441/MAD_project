@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Solent_Eat_Out</string>
+    <string name="addrestaurant">add resturant</string>
+    <string name="search">Search!</string>
 </resources>
