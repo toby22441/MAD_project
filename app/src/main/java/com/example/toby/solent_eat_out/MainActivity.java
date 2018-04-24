@@ -1,37 +1,29 @@
 package com.example.toby.solent_eat_out;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.support.v7.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-
 import org.osmdroid.config.Configuration;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.content.Intent;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
-import android.app.Activity;
-import android.os.Bundle;
-import android.location.LocationManager;
+import org.osmdroid.views.overlay.ItemizedIconOverlay;
+import org.osmdroid.views.overlay.OverlayItem;
 import android.location.LocationListener;
 import android.location.Location;
-import android.content.Context;
+import java.util.ArrayList;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
     MapView mv;
+    ItemizedIconOverlay<OverlayItem> items;
+    ItemizedIconOverlay.OnItemGestureListener<OverlayItem> markerGestureListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,6 +40,18 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         mv.setBuiltInZoomControls(true);
         mv.getController().setZoom(16);
         mv.getController().setCenter(new GeoPoint(50.907479, -1.413357));
+
+        markerGestureListener = new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
+            public boolean onItemLongPress(int i, OverlayItem item) {
+                Toast.makeText(MainActivity.this, item.getSnippet(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
+            public boolean onItemSingleTapUp(int i, OverlayItem item) {
+                Toast.makeText(MainActivity.this, item.getSnippet(), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        };
 
 
         LocationManager mgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -91,9 +95,33 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         return false;
     }
 
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+
+        if (requestCode == 0) {
+
+            if (resultCode == RESULT_OK) {
+
+                Bundle extras = intent.getExtras();
+
+                String name = extras.getString("com.example.toby.solent_eat_out.name");
+                String address = extras.getString("com.example.toby.solent_eat_out.address");
+                String cuisine = extras.getString("com.example.toby.solent_eat_out.cuisine_type");
+                String rating = extras.getString("com.example.toby.solent_eat_out.restaurant_rating");
+
+                items = new ItemizedIconOverlay<OverlayItem>(this, new ArrayList<OverlayItem>(), markerGestureListener);
+                OverlayItem restaurant = new OverlayItem("restaurant", name +  "," + address + "," + cuisine + "," + rating, mv.getMapCenter());
+
+                restaurant.setMarker(getResources().getDrawable(R.drawable.marker));
+                items.addItem(restaurant);
+                mv.getOverlays().add(items);
+
+            }
+
+        }
+
+
+    }
 }
-
-
 
 
 

@@ -13,7 +13,7 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="numberDecimal|numberSigned"
+        android:inputType="textPersonName|textCapWords"
         android:id="@+id/restaurant_name"
         android:textSize="18sp"
         />
@@ -29,7 +29,7 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="numberDecimal|numberSigned"
+        android:inputType="textPostalAddress"
         android:id="@+id/restaurant_address"
         android:textSize="18sp"
         />
@@ -45,7 +45,7 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="numberDecimal|numberSigned"
+        android:inputType="text"
         android:id="@+id/cuisine"
         android:textSize="18sp"
         />
