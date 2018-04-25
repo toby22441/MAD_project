@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Solent_Eat_Out</string>
     <string name="addrestaurant">add resturant</string>
-    <string name="search">Search!</string>
+    <string name="add">Add!</string>
+    <string name="save">Save all restaurants</string>
+    <string name="preferences">preferences</string>
 </resources>

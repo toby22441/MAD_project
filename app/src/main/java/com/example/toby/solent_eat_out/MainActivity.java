@@ -1,7 +1,9 @@
 package com.example.toby.solent_eat_out;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.LocationManager;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,12 +20,14 @@ import android.location.LocationListener;
 import android.location.Location;
 import java.util.ArrayList;
 import android.widget.Toast;
+import java.io.*;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
     MapView mv;
     ItemizedIconOverlay<OverlayItem> items;
     ItemizedIconOverlay.OnItemGestureListener<OverlayItem> markerGestureListener;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,24 +63,24 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     public void onLocationChanged(Location newLoc) {
-        Toast.makeText(this, "!", Toast.LENGTH_LONG).show();
+       // Toast.makeText(this, "!", Toast.LENGTH_LONG).show();
         mv.getController().setCenter(new GeoPoint(newLoc));
     }
 
     public void onProviderDisabled(String provider) {
-        Toast.makeText(this, "Provider " + provider +
-                " disabled", Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "Provider " + provider +
+              //  " disabled", Toast.LENGTH_LONG).show();
     }
 
     public void onProviderEnabled(String provider) {
-        Toast.makeText(this, "Provider " + provider +
-                " enabled", Toast.LENGTH_LONG).show();
+       // Toast.makeText(this, "Provider " + provider +
+               // " enabled", Toast.LENGTH_LONG).show();
     }
 
     public void onStatusChanged(String provider, int status, Bundle extras) {
 
-        Toast.makeText(this, "Status changed: " + status,
-                Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, "Status changed: " + status,
+              //  Toast.LENGTH_LONG).show();
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -91,9 +95,37 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             startActivityForResult(intent, 0);
             return true;
         }
+        if (item.getItemId() == R.id.save) {
+
+            try
+            {
+                PrintWriter printwriter =
+                        new PrintWriter(new FileWriter(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Restruants.csv", true));
+
+                for(int i=0; i<items.size(); i++)
+                {
+                    OverlayItem itm = items.getItem(i);
+                    printwriter.println(itm.getTitle()+","+itm.getSnippet()+","+itm.getPoint().getLatitude()
+                            +","+itm.getPoint().getLongitude());
+                }
+                printwriter.close();
+            }
+            catch(IOException e)
+            {
+                System.out.println (e);
+            }
+
+            return true;
+        }
+        if (item.getItemId() == R.id.preferences) {
+            Intent intent = new Intent(this, PreferencesActivity.class);
+            startActivityForResult(intent, 0);
+            return true;
+        }
 
         return false;
     }
+
 
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
@@ -119,6 +151,34 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         }
 
+
+    }
+
+
+    public void onStart() {
+        super.onStart();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        boolean auto = prefs.getBoolean("auto", true);
+        if (items != null) {
+            if (auto) {
+
+
+                try {
+                    PrintWriter printwriter =
+                            new PrintWriter(new FileWriter(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Restruants.csv", true));
+
+                    for (int i = 0; i < items.size(); i++) {
+                        OverlayItem itm = items.getItem(i);
+                        printwriter.println(itm.getTitle() + "," + itm.getSnippet() + "," + itm.getPoint().getLatitude()
+                                + "," + itm.getPoint().getLongitude());
+                    }
+                    printwriter.close();
+                } catch (IOException e) {
+                    System.out.println(e);
+                }
+            }
+
+        }
 
     }
 }
