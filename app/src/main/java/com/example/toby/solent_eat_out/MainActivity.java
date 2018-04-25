@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         mv = (MapView) findViewById(R.id.map1);
 
         mv.setBuiltInZoomControls(true);
-        mv.getController().setZoom(16);
+        mv.getController().setZoom(0);
         mv.getController().setCenter(new GeoPoint(50.907479, -1.413357));
 
         markerGestureListener = new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             try
             {
                 PrintWriter printwriter =
-                        new PrintWriter(new FileWriter(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Restruants.csv", true));
+                        new PrintWriter(new FileWriter(Environment.getExternalStorageDirectory().getAbsolutePath() + "/R.csv", true));
 
                 for(int i=0; i<items.size(); i++)
                 {
@@ -123,6 +123,40 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             return true;
         }
 
+        if (item.getItemId() == R.id.load) {
+            try
+            {
+                BufferedReader reader = new BufferedReader(new FileReader(Environment.getExternalStorageDirectory().getAbsolutePath() + "/R.csv"));
+                String line;
+
+                while((line = reader.readLine()) != null)
+                {
+
+                    String[] comp = line.split(",");
+                    if(comp.length==4)
+                    {
+                        Double lat = Double.valueOf(comp[2]).doubleValue();
+                        Double lon = Double.valueOf(comp[3]).doubleValue();
+                        items = new ItemizedIconOverlay<OverlayItem>(this, new ArrayList<OverlayItem>(), markerGestureListener);
+                        OverlayItem restaurant = new OverlayItem(comp[0],comp[1], new GeoPoint(lat,lon));
+
+                        restaurant.setMarker(getResources().getDrawable(R.drawable.marker));
+                        items.addItem(restaurant);
+                        mv.getOverlays().add(items);
+
+                    }
+
+
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+
+            return true;
+        }
+
         return false;
     }
 
@@ -141,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 String rating = extras.getString("com.example.toby.solent_eat_out.restaurant_rating");
 
                 items = new ItemizedIconOverlay<OverlayItem>(this, new ArrayList<OverlayItem>(), markerGestureListener);
-                OverlayItem restaurant = new OverlayItem("restaurant", name +  "," + address + "," + cuisine + "," + rating, mv.getMapCenter());
+                OverlayItem restaurant = new OverlayItem(name,  address  + " " + cuisine +" " + rating, new GeoPoint(mv.getMapCenter().getLatitude(), mv.getMapCenter().getLongitude()));
 
                 restaurant.setMarker(getResources().getDrawable(R.drawable.marker));
                 items.addItem(restaurant);
@@ -159,13 +193,21 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         super.onStart();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         boolean auto = prefs.getBoolean("auto", true);
+
+
+
+
+
+
+
+
         if (items != null) {
             if (auto) {
 
 
                 try {
                     PrintWriter printwriter =
-                            new PrintWriter(new FileWriter(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Restruants.csv", true));
+                            new PrintWriter(new FileWriter(Environment.getExternalStorageDirectory().getAbsolutePath() + "/R.csv", true));
 
                     for (int i = 0; i < items.size(); i++) {
                         OverlayItem itm = items.getItem(i);
