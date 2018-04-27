@@ -3,6 +3,7 @@ package com.example.toby.solent_eat_out;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.content.Intent;
@@ -18,7 +19,10 @@ import org.osmdroid.views.overlay.ItemizedIconOverlay;
 import org.osmdroid.views.overlay.OverlayItem;
 import android.location.LocationListener;
 import android.location.Location;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import android.widget.EditText;
 import android.widget.Toast;
 import java.io.*;
 
@@ -63,24 +67,24 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     public void onLocationChanged(Location newLoc) {
-       // Toast.makeText(this, "!", Toast.LENGTH_LONG).show();
+       Toast.makeText(this, "!", Toast.LENGTH_LONG).show();
         mv.getController().setCenter(new GeoPoint(newLoc));
     }
 
     public void onProviderDisabled(String provider) {
-        //Toast.makeText(this, "Provider " + provider +
-              //  " disabled", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Provider " + provider +
+               " disabled", Toast.LENGTH_LONG).show();
     }
 
     public void onProviderEnabled(String provider) {
-       // Toast.makeText(this, "Provider " + provider +
-               // " enabled", Toast.LENGTH_LONG).show();
+       Toast.makeText(this, "Provider " + provider +
+               " enabled", Toast.LENGTH_LONG).show();
     }
 
     public void onStatusChanged(String provider, int status, Bundle extras) {
 
-        //Toast.makeText(this, "Status changed: " + status,
-              //  Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Status changed: " + status,
+              Toast.LENGTH_LONG).show();
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -157,6 +161,15 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             return true;
         }
 
+        if (item.getItemId() == R.id.InternetLoad) {
+
+            NetLoad n = new NetLoad();
+            n.execute();
+
+            return true;
+        }
+
+
         return false;
     }
 
@@ -195,12 +208,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         boolean auto = prefs.getBoolean("auto", true);
 
 
-
-
-
-
-
-
         if (items != null) {
             if (auto) {
 
@@ -226,4 +233,58 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 }
 
 
+class NetLoad extends AsyncTask<Void,Void,String> {
+    MapView mv;
+    ItemizedIconOverlay<OverlayItem> items;
+    ItemizedIconOverlay.OnItemGestureListener<OverlayItem> markerGestureListener;
 
+
+    public String doInBackground(Void... unused) {
+
+        HttpURLConnection conn = null;
+        try {
+
+            URL url = new URL("http://www.free-map.org.uk/course/mad/ws/get.php?year=18&username=user011&format=csv ");
+            conn = (HttpURLConnection) url.openConnection();
+            InputStream in = conn.getInputStream();
+
+            if (conn.getResponseCode() == 200) {
+                BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                String result = "", line;
+
+                while ((line = br.readLine()) != null) {
+
+                    String[] comp = line.split(",");
+
+                    if(comp.length==6) {
+
+                        Double lat = Double.valueOf(comp[5]).doubleValue();
+                        Double lon = Double.valueOf(comp[4]).doubleValue();
+                        items = new ItemizedIconOverlay<OverlayItem>(this, new ArrayList<OverlayItem>(), markerGestureListener);
+                        OverlayItem restaurant = new OverlayItem(comp[0], comp[1] + comp[2]+ comp[3], new GeoPoint(lat, lon));
+
+                        restaurant.setMarker(getResources().getDrawable(R.drawable.marker));
+                        items.addItem(restaurant);
+                        mv.getOverlays().add(items);
+                    }
+                }
+                return result;
+            } else {
+                return "HTTP ERROR: " + conn.getResponseCode();
+            }
+        } catch (IOException e) {
+            return e.toString();
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+    }
+
+    public void onPostExecute(String result)
+    {
+
+
+
+    }
+}

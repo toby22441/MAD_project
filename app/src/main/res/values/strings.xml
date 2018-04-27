@@ -5,4 +5,5 @@
     <string name="save">Save all restaurants</string>
     <string name="preferences">preferences</string>
     <string name="load">load</string>
+    <string name="InternetLoad">load from internet</string>
 </resources>
