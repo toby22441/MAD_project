@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
         super.onCreate(savedInstanceState);
 
-        // This line sets the user agent, a requirement to download OSM maps
+
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
 
         setContentView(R.layout.activity_main);
@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         mv.setBuiltInZoomControls(true);
         mv.getController().setZoom(0);
         mv.getController().setCenter(new GeoPoint(50.907479, -1.413357));
+
 
         markerGestureListener = new ItemizedIconOverlay.OnItemGestureListener<OverlayItem>() {
             public boolean onItemLongPress(int i, OverlayItem item) {
@@ -60,7 +61,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 return true;
             }
         };
-
+        items = new ItemizedIconOverlay<OverlayItem>(this, new ArrayList<OverlayItem>(), markerGestureListener);
+        mv.getOverlays().add(items);
 
         LocationManager mgr = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         mgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
@@ -72,13 +74,13 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     }
 
     public void onProviderDisabled(String provider) {
-        Toast.makeText(this, "Provider " + provider +
+       Toast.makeText(this, "Provider " + provider +
                " disabled", Toast.LENGTH_LONG).show();
     }
 
     public void onProviderEnabled(String provider) {
-       Toast.makeText(this, "Provider " + provider +
-               " enabled", Toast.LENGTH_LONG).show();
+      Toast.makeText(this, "Provider " + provider +
+              " enabled", Toast.LENGTH_LONG).show();
     }
 
     public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -141,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                     {
                         Double lat = Double.valueOf(comp[2]).doubleValue();
                         Double lon = Double.valueOf(comp[3]).doubleValue();
-                        items = new ItemizedIconOverlay<OverlayItem>(this, new ArrayList<OverlayItem>(), markerGestureListener);
+
                         OverlayItem restaurant = new OverlayItem(comp[0],comp[1], new GeoPoint(lat,lon));
 
                         restaurant.setMarker(getResources().getDrawable(R.drawable.marker));
@@ -153,9 +155,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
                 }
             }
-            catch (Exception e)
+            catch(IOException e)
             {
-
+                System.out.println (e);
             }
 
             return true;
@@ -187,12 +189,12 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 String cuisine = extras.getString("com.example.toby.solent_eat_out.cuisine_type");
                 String rating = extras.getString("com.example.toby.solent_eat_out.restaurant_rating");
 
-                items = new ItemizedIconOverlay<OverlayItem>(this, new ArrayList<OverlayItem>(), markerGestureListener);
+
                 OverlayItem restaurant = new OverlayItem(name,  address  + " " + cuisine +" " + rating, new GeoPoint(mv.getMapCenter().getLatitude(), mv.getMapCenter().getLongitude()));
 
                 restaurant.setMarker(getResources().getDrawable(R.drawable.marker));
                 items.addItem(restaurant);
-                mv.getOverlays().add(items);
+
 
             }
 
@@ -201,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
 
     }
 
-
+//auto preference code
     public void onStart() {
         super.onStart();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -230,61 +232,61 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
 
     }
-}
 
 
-class NetLoad extends AsyncTask<Void,Void,String> {
-    MapView mv;
-    ItemizedIconOverlay<OverlayItem> items;
-    ItemizedIconOverlay.OnItemGestureListener<OverlayItem> markerGestureListener;
+
+    class NetLoad extends AsyncTask<Void,Void,String> {
 
 
-    public String doInBackground(Void... unused) {
+        public String doInBackground(Void... unused) {
 
-        HttpURLConnection conn = null;
-        try {
+            HttpURLConnection conn = null;
+            try {
 
-            URL url = new URL("http://www.free-map.org.uk/course/mad/ws/get.php?year=18&username=user011&format=csv ");
-            conn = (HttpURLConnection) url.openConnection();
-            InputStream in = conn.getInputStream();
+                URL url = new URL("http://www.free-map.org.uk/course/mad/ws/get.php?year=18&username=user011&format=csv ");
+                conn = (HttpURLConnection) url.openConnection();
+                InputStream in = conn.getInputStream();
 
-            if (conn.getResponseCode() == 200) {
-                BufferedReader br = new BufferedReader(new InputStreamReader(in));
-                String result = "", line;
+                if (conn.getResponseCode() == 200) {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(in));
+                    String result = "", line;
 
-                while ((line = br.readLine()) != null) {
+                    while ((line = br.readLine()) != null) {
 
-                    String[] comp = line.split(",");
+                        String[] comp = line.split(",");
 
-                    if(comp.length==6) {
+                        if(comp.length==6) {
 
-                        Double lat = Double.valueOf(comp[5]).doubleValue();
-                        Double lon = Double.valueOf(comp[4]).doubleValue();
-                        items = new ItemizedIconOverlay<OverlayItem>(this, new ArrayList<OverlayItem>(), markerGestureListener);
-                        OverlayItem restaurant = new OverlayItem(comp[0], comp[1] + comp[2]+ comp[3], new GeoPoint(lat, lon));
+                            Double lat = Double.valueOf(comp[5]).doubleValue();
+                            Double lon = Double.valueOf(comp[4]).doubleValue();
 
-                        restaurant.setMarker(getResources().getDrawable(R.drawable.marker));
-                        items.addItem(restaurant);
-                        mv.getOverlays().add(items);
+                            OverlayItem restaurant = new OverlayItem(comp[0], comp[1] + comp[2]+ comp[3], new GeoPoint(lat, lon));
+
+
+                            items.addItem(restaurant);
+
+                        }
                     }
+                    return result;
+                } else {
+                    return "HTTP ERROR: " + conn.getResponseCode();
                 }
-                return result;
-            } else {
-                return "HTTP ERROR: " + conn.getResponseCode();
-            }
-        } catch (IOException e) {
-            return e.toString();
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
+            } catch (IOException e) {
+                return e.toString();
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
             }
         }
-    }
 
-    public void onPostExecute(String result)
-    {
-
+        public void onPostExecute(String result)
+        {
 
 
+
+        }
     }
 }
+
+
